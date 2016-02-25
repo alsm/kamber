@@ -5,13 +5,13 @@ require "yaml"
 require "kemal"
 require "./config"
 
-$posts = YAML.load_all File.read("./posts/posts.yml")
+$posts = YAML.parse_all File.read("./posts/posts.yml")
 
 def post_item(file)
   post = {} of String => String
   contents = ""
   $posts.each do |_post|
-    _post = _post as Hash
+    _post = _post.as_h
     if _post.has_key? "file"
       if (_post["file"] as String).ends_with?("#{file}.md" as String)
         post = _post
@@ -23,18 +23,17 @@ def post_item(file)
 end
 
 module Kamber
-
   get "/" do
     theme_index
   end
 
   get "/style/:path" do |env|
-    env.content_type = "text/css"
+    env.response.content_type = "text/css"
     File.read theme_style(env.params["path"])
   end
 
   get "/script/:path" do |env|
-    env.content_type = "application/javascript"
+    env.response.content_type = "application/javascript"
     File.read theme_script(env.params["path"])
   end
 
@@ -54,5 +53,4 @@ module Kamber
     post_name = env.params["post"] as String
     post_item(category + "/" + subcategory + "/" + post_name)
   end
-
 end
