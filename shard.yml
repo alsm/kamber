@@ -6,7 +6,7 @@ dependencies:
     github: sdogruyol/kemal
     branch: master
   kamber-theme-default:
-    github: f/kamber-theme-default
+    github: alsm/kamber-theme-default
     branch: master
 
 authors:
