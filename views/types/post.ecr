@@ -1,0 +1,24 @@
+<article class="post">
+  <header>
+    <h2>
+      <a href="/posts/<%= post.title.downcase.gsub(" ", "_") %>"><%= post.title %></a>
+    </h2>
+    <% if post.subtitle %>
+      <p class="abstract">
+        <%= post.subtitle %>
+      </p>
+    <% end %>
+    <p class="abstract">
+      <% end_index = post.content.index("\n\n", 200) ? post.content.index("\n\n", 200) as Int32 : post.content.size %>
+      <%= Markdown.to_html post.content[0..end_index] %>
+      <% if post.content.index("\n\n", 200) != nil %>
+        <a href="/posts/<%= post.title.downcase.gsub(" ", "_") %>">Read more</a>
+      <% end %>
+    </p>
+    <% if !post.tags.empty? %>
+      <p class="meta">
+        <%= post.tags.join(", ") %>
+      </p>
+    <% end %>
+  </header>
+</article>

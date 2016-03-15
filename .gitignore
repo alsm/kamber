@@ -3,4 +3,7 @@
 /.crystal/
 /.shards/
 
-
+/kamber
+/posts
+/config.yml
+/kemal.log

@@ -1,56 +1,60 @@
-require "./kamber/*"
+require "./kamber/config"
+require "./kamber/posts"
 
 require "markdown"
 require "yaml"
 require "kemal"
-require "./config"
+require "openssl"
+require "http/server"
 
-$posts = YAML.parse_all File.read("./posts/posts.yml")
-
-def post_item(file)
-  post = {} of String => String
-  contents = ""
-  $posts.each do |_post|
-    _post = _post.as_h
-    if _post.has_key? "file"
-      if (_post["file"] as String).ends_with?("#{file}.md" as String)
-        post = _post
-        contents = File.read(_post["file"] as String)
-      end
+def post_item(name)
+  $posts.each do |post|
+    if post.post_type == "post" && post.title.downcase.gsub(" ", "_") == name
+      return render("views/post.ecr")
     end
   end
-  theme_item(post, contents)
+  puts "Didn't find post for #{name}"
 end
+
+$config = Config.from_yaml(File.read("config.yml"))
+
+if $config.ssl.has_key?("chain_file") && $config.ssl.has_key?("key_file")
+  puts "loading ssl conf"
+  ssl_context = OpenSSL::SSL::Context.new
+  ssl_context.certificate_chain = $config.ssl["chain_file"]
+  ssl_context.private_key = $config.ssl["key_file"]
+  puts "ssl conf enabled"
+  puts ssl_context
+  Kemal.config.ssl = ssl_context
+end
+
+Kemal.config.port = $config.port
+Kemal.config.serve_static = false
+Kemal.config.env = "production" if $config.production
+
+$posts = read_posts($config.posts_dir)
 
 module Kamber
   get "/" do
-    theme_index
+    render("views/index.ecr")
   end
 
   get "/style/:path" do |env|
     env.response.content_type = "text/css"
-    File.read theme_style(env.params["path"])
+    File.read("static/css/" + env.params.url["path"] as String)
   end
 
   get "/script/:path" do |env|
     env.response.content_type = "application/javascript"
-    File.read theme_script(env.params["path"])
+    File.read("static/js/" + env.params.url["path"] as String)
   end
 
-  get "/:post" do |env|
-    post_item(env.params["post"])
+  get "/posts/:post" do |env|
+    puts "posts"
+    post_item(env.params.url["post"] as String)
   end
 
-  get "/:category/:post" do |env|
-    category = env.params["category"] as String
-    post = env.params["post"] as String
-    post_item(category + "/" + post)
-  end
-
-  get "/:category/:subcategory/:post" do |env|
-    category = env.params["category"] as String
-    subcategory = env.params["subcategory"] as String
-    post_name = env.params["post"] as String
-    post_item(category + "/" + subcategory + "/" + post_name)
+  get "/tags/:tags" do |env|
+    tags = (env.params.url["tags"] as String).split(',')
   end
 end

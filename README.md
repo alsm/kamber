@@ -1,180 +1,48 @@
 # Kamber
 
-![Kamber](./asset/kamber.png)
+This is my fork of [kamber](https://github.com/f/kamber)
 
 Kamber is a blog server based on [Kemal](http://github.com/sdogruyol/kemal).
 
-[![Join the chat at https://gitter.im/f/kamber](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/f/kamber?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 > This is not a static blog generator, **it's a static blog server**. It _doesn't require_ any other HTTP servers. It uses Crystal and Kemal to generate HTML and also serve it.
 
-## Quickstart
+## Background
 
-Deploy on Heroku and start blogging **in a minute**!
+Seeing the original kamber project and having just started looking at [crystal](http://crystal-lang.org) adapting it for my needs seemed like the perfect way to learn.
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/f/kamber)
+## Getting started
 
-[View an Heroku example](https://kamber-test.herokuapp.com/)
+I'm assuming you already have a working Crystal installation, have cloned this repo and run `shards install`
 
-## Features
+First thing you'll need to do is create a `config.yml` file in the kamber directory, this contains the configuration information kamber needs.
 
-- Supports many post types:
-  - **Markdown** Posts
-  - GitHub **Gist**
-  - **Tweet** Embeds
-  - **Video** Embeds
-  - Disqus Comments
-- **Very fast, ~15x faster than other static site generators/servers**, since it's based on [Kemal](http://github.com/sdogruyol/kemal). [See Benchmarks](https://github.com/sdogruyol/kemal#super-fast-3)
-- Easy to develop. Just add contents to **`posts.yml`** file.
-- Custom themes.
-
-## Getting Started
-
-### 1. Install Crystal and Kamber
-```
-brew install crystal-lang
-git clone https://github.com/f/kamber myblog
-cd myblog
-shards install
+```yaml
+port: 3000 #The port we are going to serve the blog on
+title: Blogtastic #The name of your blog
+description: Random thoughts from the depths #Subtitle/description for your blog
+posts_dir: ./posts/ #The directory where the files for your posts can be found
+production: false #Is kemal running in production mode (main difference is where logging goes)
+ssl:
+  chain_file: chainfile.pem #TLS cert chain file in pem format
+  key_file: keyfile.pem #TLS key file in pem format
 ```
 
-### 2. Add Contents
+`title`, `description`, `port` and `posts_dir` are all required fields. `production` and `ssl` are optional.
 
-- Edit `kamber/config.cr` and set your title.
-- Edit `posts/posts.yml` file and add some content.
+That's enough to get it going, but all you'll see is a nice blank page 😀
 
-### 3. Build and Run
-```
-crystal build --release src/kamber.cr
-./kamber
-```
+Posts are YAML files in the `posts_dir` directory and also have a fixed format of fields
 
-To run in production, add `-e production` flag.
+```yaml
+type: post #The other post types from kamber are still available too
+title: Frist Post #title of the post
+subtitle: Getting going #subtitle for the post
+date: 2016-03-07 #date of publication
+author: me #name of the author of the post, can be html
+content: | #this is a string that should be written in Markdown, this example uses a block string to make it easier to layout.
+  ##Lots of **content**!!
 
-```
-./kamber -e production
-```
-
-## Themes
-
-Kamber has theme support.
-
-| Theme | GitHub |
-|-------|--------|
-| Kamber Default Theme | [`f/kamber-theme-default`](http://github.com/f/kamber-theme-default) |
-| Kamber Dark Theme | [`f/kamber-theme-dark`](http://github.com/f/kamber-theme-dark) |
-
-[How to install themes](https://github.com/f/kamber-theme-default/tree/master#1-add-as-a-dependency)
-
-### Writing Custom Themes
-
-Kamber has a simple API to build your own themes. To start quickly, just [fork the `kamber-theme-default`](https://github.com/f/kamber-theme-default/fork) and start hacking it.
-
-**We are waiting for your themes!**
-
-## Configuration
-
-You can set your blog title from `config.cr`
-
-```crystal
-$BLOG_TITLE = "My Awesome Blog"
-$BLOG_DESC = "programming journal"
-$GOOGLE_ANALYTICS = "UA-XXXXX-X"
-
-# Activate Theme
-require "kamber-theme-default"
+  _even more content!!_
 ```
 
-## Post Types
-
-`posts/posts.yml` has multiple YAML documents, each represents a blog item (aka post type).
-
-### Post (Markdown)
-
-```yml
-type: post
-title: Example Post
-abstract: Lorem ipsum dolor sit amet, consectetur adipisicing elit
-file: posts/example-post.md
-disqus: true
-```
-
-### Link
-
-```yml
-type: link
-title: Example Link
-url: "http://crystal-lang.org"
-```
-
-### Video
-
-Kamber supports **Youtube** and **Vimeo** videos. The main pattern of `video` is
-`[video provider]/[video id]`
-
-```yml
-type: video
-title: Example Video
-abstract:
-video: youtube/YE3GkCB3t_0
-```
-
-If you will use **Vimeo**, change `video` key to
-
-```yml
-video: vimeo/147842467
-```
-
-### Tweet
-
-This type embeds Tweets to the index. The pattern is `[username]/[tweet id]`
-
-```yml
-type: tweet
-title: Example Tweet
-tweet: fkadev/673506301415194625
-```
-
-### Gist
-
-This type embeds GitHub Gists to the index. The pattern is `[username]/[gist id]`
-
-```yml
-type: gist
-title: Example Gist
-gist: f/c12af6b9e7d53bd9224d
-```
-
-## Deploy to Heroku
-
-Kamber uses custom buildpack to run in Heroku.
-
-```
-heroku create myblog --buildpack https://github.com/f/heroku-buildpack-kamber
-git push heroku master
-```
-
-## Screenshots
-
-![Screen 1](./asset/screen-1.png)
-
-![Screen 2](./asset/screen-2.png)
-
-## Contributing
-
-1. Fork it ( https://github.com/f/kamber/fork )
-2. Create your feature branch (git checkout -b my-new-feature)
-3. Commit your changes (git commit -am 'Add some feature')
-4. Push to the branch (git push origin my-new-feature)
-5. Create a new Pull Request
-
-## Roadmap
-
-- [x] Add base post types and make it run
-- [ ] Add page support
-
-## Contributors
-
-- [f](https://github.com/f) Fatih Kadir Akın - creator, maintainer
-
-> Kambersiz düğün olmaz.
+kamber doesn't monitor the posts directory so you will need to restart it to get it to reload any changes.
